@@ -52,7 +52,7 @@ export default async function LatestInvoices({
                 </p>
               </div>
             );
-          })}//cx
+          })}
         </div> 
         <div className="flex items-center pb-2 pt-6">
           <ArrowPathIcon className="h-5 w-5 text-gray-500" />

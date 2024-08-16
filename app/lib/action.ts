@@ -3,6 +3,7 @@
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { error } from 'console';
 
 
  const FormSchema = z.object({
@@ -25,9 +26,16 @@ export async function createInvoice(formData: FormData) {
   const amountInCents = amount*100;
   const date = new Date().toISOString().split('T')[0];
 
-
+ try {
   await sql` INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
+  VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
+
+ } catch (error) {
+  return{
+    message:'Database Error: Faild to Create Invoice',
+  };
+  
+ }
 
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
@@ -47,19 +55,31 @@ export async function updateInvoice(id: string, formData: FormData) {
   });
  
   const amountInCents = amount * 100;
- 
+ try {
   await sql`
     UPDATE invoices
     SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
     WHERE id = ${id}
   `;
+ } catch (error) {
+  return{
+     message:'Database Error: Failed To Update Invoice',
+  };
+  
+ }
+  
  
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
+  throw new Error('Failed To Delete Invoice');
+  try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
+    return { message: 'Deleted Invoice.' };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Delete Invoice.' };
   }
-  
+}
